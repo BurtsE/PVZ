@@ -6,10 +6,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	domain "pvz/internal/domain/users"
-	"pvz/internal/service/receptions"
 )
 
-var _ receptions.UserRepository = (*PostgresRepo)(nil)
+//var _ receptions.UserRepository = (*PostgresRepo)(nil)
 
 type userDB struct {
 	ID    uuid.UUID `db:"id"`

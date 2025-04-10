@@ -13,10 +13,10 @@ import (
 var _ openapi.ServerInterface = (*httpServer)(nil)
 
 type httpServer struct {
-	app application
+	userService UserService
 }
 
-func SetupHTTPServer(app application) *http.Server {
+func SetupHTTPServer(userService UserService) *http.Server {
 	port := config.GetApplicationPort()
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -34,8 +34,8 @@ func SetupHTTPServer(app application) *http.Server {
 			param.Request.ContentLength,
 		)
 	}))
-	server := httpServer{
-		app: app,
+	server := &httpServer{
+		userService: userService,
 	}
 	openapi.RegisterHandlers(r, server)
 	s := &http.Server{
@@ -45,47 +45,47 @@ func SetupHTTPServer(app application) *http.Server {
 	return s
 }
 
-func (h httpServer) PostDummyLogin(c *gin.Context) {
+func (h *httpServer) PostDummyLogin(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostLogin(c *gin.Context) {
+func (h *httpServer) PostLogin(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostProducts(c *gin.Context) {
+func (h *httpServer) PostProducts(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
+func (h *httpServer) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostPvz(c *gin.Context) {
+func (h *httpServer) PostPvz(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
+func (h *httpServer) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
+func (h *httpServer) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostReceptions(c *gin.Context) {
+func (h *httpServer) PostReceptions(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (h httpServer) PostRegister(c *gin.Context) {
+func (h *httpServer) PostRegister(c *gin.Context) {
 	//TODO implement me
 	panic("implement me")
 }
