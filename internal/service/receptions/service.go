@@ -7,5 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	GetUser(ctx context.Context, id uuid.UUID) (*users.User, error)
+	GetUser(ctx context.Context, id uuid.UUID) (users.User, error)
+	CreateUser(ctx context.Context, user users.User) error
 }

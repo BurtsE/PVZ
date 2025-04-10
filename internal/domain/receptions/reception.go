@@ -10,12 +10,12 @@ type Reception struct {
 	status   string
 	pvzId    uuid.UUID
 	initTime time.Time
+	products []Product
 }
 
 func NewReception(id, pvzId uuid.UUID, status string, initTime time.Time) (*Reception, error) {
-
 	return &Reception{
-		id:       uuid.UUID{},
+		id:       id,
 		status:   status,
 		pvzId:    pvzId,
 		initTime: initTime,

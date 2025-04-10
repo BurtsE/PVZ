@@ -7,6 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	Moderator = 1 << iota
+	Employee
+)
+
 var (
 	ErrUserNotFound     = errors.New("user not found")
 	ErrInvalidUser      = errors.New("invalid user")
@@ -18,25 +23,35 @@ type User struct {
 	id    uuid.UUID
 	name  string
 	email string
+	role  byte
 }
 
-func NewUser(id uuid.UUID, name, email string) (*User, error) {
-	if err := validateUsername(name); err != nil {
-		return nil, err
+func NewUser(id uuid.UUID, name, email, roleStr string) (User, error) {
+	var (
+		role byte
+		err  error
+	)
+	if err = validateUsername(name); err != nil {
+		return User{}, err
 	}
-	if err := validateEmail(email); err != nil {
-		return nil, err
+	if err = validateEmail(email); err != nil {
+		return User{}, err
 	}
 
-	return &User{
+	if role, err = validateRole(roleStr); err != nil {
+		return User{}, err
+	}
+
+	return User{
 		id:    id,
 		name:  name,
 		email: email,
+		role:  role,
 	}, nil
 }
 
-func CreateUser(name, email string) (*User, error) {
-	return NewUser(uuid.New(), name, email)
+func CreateUser(name, email, role string) (User, error) {
+	return NewUser(uuid.New(), name, email, role)
 }
 
 func (u *User) ID() uuid.UUID {
@@ -49,6 +64,10 @@ func (u *User) Name() string {
 
 func (u *User) Email() string {
 	return u.email
+}
+
+func (u *User) Role() byte {
+	return u.role
 }
 
 func (u *User) SendToEmail(_ string) error {
@@ -75,4 +94,14 @@ func validateEmail(email string) error {
 		return fmt.Errorf("%w: email is required", ErrUserValidation)
 	}
 	return nil
+}
+
+func validateRole(role string) (byte, error) {
+	switch role {
+	case "employee":
+		return Employee, nil
+	case "moderator":
+		return Moderator, nil
+	}
+	return 0, fmt.Errorf("%w: role not supported", ErrInvalidUser)
 }

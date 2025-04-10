@@ -1,4 +1,4 @@
-package pick_up_points
+package receptions
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	ErrPickUpPointNotFound = errors.New("products not found")
+	ErrPickUpPointNotFound = errors.New("point not found")
 	ErrInvalidPickUpPoint  = errors.New("invalid pick-up point")
 )
 
@@ -22,6 +22,7 @@ type PickUpPoint struct {
 	id               uuid.UUID
 	registrationDate time.Time
 	city             uint64
+	receptions       []Reception
 }
 
 func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, cityStr string) (*PickUpPoint, error) {
