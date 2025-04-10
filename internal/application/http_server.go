@@ -3,7 +3,6 @@ package application
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"net/http"
 	"pvz/generated/openapi"
@@ -15,51 +14,6 @@ var _ openapi.ServerInterface = (*httpServer)(nil)
 
 type httpServer struct {
 	app application
-}
-
-func (h httpServer) PostDummyLogin(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostLogin(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostProducts(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) GetPvz(ctx echo.Context, params openapi.GetPvzParams) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostPvz(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostPvzPvzIdCloseLastReception(ctx echo.Context, pvzId openapi_types.UUID) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostPvzPvzIdDeleteLastProduct(ctx echo.Context, pvzId openapi_types.UUID) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostReceptions(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h httpServer) PostRegister(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
 }
 
 func SetupHTTPServer(app application) *http.Server {
@@ -89,4 +43,49 @@ func SetupHTTPServer(app application) *http.Server {
 		Addr:    fmt.Sprintf(":%s", port),
 	}
 	return s
+}
+
+func (h httpServer) PostDummyLogin(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostLogin(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostProducts(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostPvz(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostReceptions(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h httpServer) PostRegister(c *gin.Context) {
+	//TODO implement me
+	panic("implement me")
 }
