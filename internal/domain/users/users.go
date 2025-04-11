@@ -3,13 +3,12 @@ package users
 import (
 	"errors"
 	"fmt"
-
 	"github.com/google/uuid"
 )
 
 const (
-	Moderator = 1 << iota
-	Employee
+	Moderator = "moderator"
+	Employee  = "employee"
 )
 
 var (
@@ -20,54 +19,54 @@ var (
 )
 
 type User struct {
-	id    uuid.UUID
-	name  string
-	email string
-	role  byte
+	id           uuid.UUID
+	email        string
+	role         string
+	passwordHash []byte
 }
 
-func NewUser(id uuid.UUID, name, email, roleStr string) (User, error) {
-	var (
-		role byte
-		err  error
-	)
-	if err = validateUsername(name); err != nil {
-		return User{}, err
-	}
-	if err = validateEmail(email); err != nil {
-		return User{}, err
-	}
+func NewUser(id uuid.UUID, email, role string, passwordHash []byte) (User, error) {
 
-	if role, err = validateRole(roleStr); err != nil {
+	if err := validateEmail(email); err != nil {
+		return User{}, err
+	}
+	if err := validateRole(role); err != nil {
 		return User{}, err
 	}
 
 	return User{
-		id:    id,
-		name:  name,
-		email: email,
-		role:  role,
+		id:           id,
+		email:        email,
+		passwordHash: passwordHash,
+		role:         role,
 	}, nil
 }
 
-func CreateUser(name, email, role string) (User, error) {
-	return NewUser(uuid.New(), name, email, role)
+func CreateUser(email, role string, passwordHash []byte) (User, error) {
+	return NewUser(uuid.New(), email, role, passwordHash)
 }
 
 func (u *User) ID() uuid.UUID {
 	return u.id
 }
 
-func (u *User) Name() string {
-	return u.name
-}
-
 func (u *User) Email() string {
 	return u.email
 }
 
-func (u *User) Role() byte {
-	return u.role
+func (u *User) PasswordHash() []byte {
+	return u.passwordHash
+}
+
+func (u *User) Role() string {
+	switch u.role {
+	case Employee:
+		return "employee"
+	case Moderator:
+		return "moderator"
+	default:
+		return ""
+	}
 }
 
 func (u *User) SendToEmail(_ string) error {
@@ -82,13 +81,6 @@ func (u *User) ChangeEmail(email string) error {
 	return nil
 }
 
-func validateUsername(username string) error {
-	if username == "" {
-		return fmt.Errorf("%w: name is required", ErrUserValidation)
-	}
-	return nil
-}
-
 func validateEmail(email string) error {
 	if email == "" {
 		return fmt.Errorf("%w: email is required", ErrUserValidation)
@@ -96,12 +88,12 @@ func validateEmail(email string) error {
 	return nil
 }
 
-func validateRole(role string) (byte, error) {
+func validateRole(role string) error {
 	switch role {
-	case "employee":
-		return Employee, nil
-	case "moderator":
-		return Moderator, nil
+	case Employee:
+		return nil
+	case Moderator:
+		return nil
 	}
-	return 0, fmt.Errorf("%w: role not supported", ErrInvalidUser)
+	return fmt.Errorf("%w: role not supported", ErrInvalidUser)
 }

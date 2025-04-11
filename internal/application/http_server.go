@@ -3,9 +3,10 @@ package application
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 	"net/http"
 	"pvz/generated/openapi"
+	"pvz/internal/application/receptions"
+	"pvz/internal/application/users"
 	"pvz/internal/config"
 	"time"
 )
@@ -13,10 +14,11 @@ import (
 var _ openapi.ServerInterface = (*httpServer)(nil)
 
 type httpServer struct {
-	userService UserService
+	*users.UserHandlers
+	*receptions.ReceptionHandlers
 }
 
-func SetupHTTPServer(userService UserService) *http.Server {
+func SetupHTTPServer(userService users.UserService, receptionsService receptions.ReceptionService) *http.Server {
 	port := config.GetApplicationPort()
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -35,57 +37,17 @@ func SetupHTTPServer(userService UserService) *http.Server {
 		)
 	}))
 	server := &httpServer{
-		userService: userService,
+		UserHandlers:      users.RegisterUserHandlers(userService),
+		ReceptionHandlers: &receptions.ReceptionHandlers{},
 	}
-	openapi.RegisterHandlers(r, server)
+	openapi.RegisterHandlersWithOptions(r, server, openapi.GinServerOptions{
+		BaseURL:      "/api/v1",
+		Middlewares:  nil,
+		ErrorHandler: nil,
+	})
 	s := &http.Server{
 		Handler: r,
 		Addr:    fmt.Sprintf(":%s", port),
 	}
 	return s
-}
-
-func (h *httpServer) PostDummyLogin(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostLogin(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostProducts(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostPvz(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostReceptions(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (h *httpServer) PostRegister(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
 }

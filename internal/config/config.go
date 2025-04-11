@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -22,4 +23,13 @@ func getEnvironmentValue(key string) string {
 		log.Fatalf("%s environment variable is missing.", key)
 	}
 	return os.Getenv(key)
+}
+
+func GetUsersPostgresURL() string {
+	user := getEnvironmentValue("POSTGRES_USER")
+	password := getEnvironmentValue("POSTGRES_PASSWORD")
+	database := getEnvironmentValue("POSTGRES_DB")
+	//port := getEnvironmentValue("POSTGRES_PORT")
+	host := getEnvironmentValue("DATABASE_HOST")
+	return fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", host, user, database, password)
 }
