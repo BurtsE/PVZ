@@ -40,8 +40,7 @@ func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) 
 
 func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 	body := openapi.PostPvzJSONRequestBody{}
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,6 +73,17 @@ func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId 
 }
 
 func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
+	body := openapi.PostReceptionsJSONBody{}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	reception, err := r.s.CreateReception(c, body.PvzId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, reception)
 	//TODO implement me
 	panic("implement me")
 }
