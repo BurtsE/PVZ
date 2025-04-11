@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	Moscow = 1 << iota
-	Spb
-	Kazan
+	Moscow = "Москва"
+	Spb    = "Санкт-Петербург"
+	Kazan  = "Казань"
 )
 
 var (
@@ -21,19 +21,16 @@ var (
 type PickUpPoint struct {
 	id               uuid.UUID
 	registrationDate time.Time
-	city             uint64
+	city             string
 	receptions       []Reception
 }
 
-func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, cityStr string) (*PickUpPoint, error) {
-	var (
-		city uint64
-		err  error
-	)
-	if city, err = validatePointCity(cityStr); err != nil {
+func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, city string) (*PickUpPoint, error) {
+
+	if err := validatePointCity(city); err != nil {
 		return nil, err
 	}
-	if err = validatePointRegistry(registrationDate); err != nil {
+	if err := validatePointRegistry(registrationDate); err != nil {
 		return nil, err
 	}
 
@@ -48,6 +45,22 @@ func CreatePickUpPoint(registrationDate time.Time, city string) (*PickUpPoint, e
 	return NewPickUpPoint(uuid.New(), registrationDate, city)
 }
 
+func (p PickUpPoint) ID() uuid.UUID {
+	return p.id
+}
+
+func (p PickUpPoint) RegistrationDate() time.Time {
+	return p.registrationDate
+}
+
+func (p PickUpPoint) City() string {
+	return p.city
+}
+
+func (p PickUpPoint) Receptions() []Reception {
+	return p.receptions
+}
+
 func validatePointRegistry(registrationDate time.Time) error {
 	if registrationDate.Before(time.Now().AddDate(-1, 0, 0)) {
 		return fmt.Errorf("%w: registration expired", ErrInvalidPickUpPoint)
@@ -56,15 +69,15 @@ func validatePointRegistry(registrationDate time.Time) error {
 	}
 	return nil
 }
-func validatePointCity(city string) (uint64, error) {
+func validatePointCity(city string) error {
 	switch city {
-	case "Москва":
-		return Moscow, nil
-	case "Санкт-Петербург":
-		return Spb, nil
-	case "Казань":
-		return Kazan, nil
+	case Moscow:
+		return nil
+	case Spb:
+		return nil
+	case Kazan:
+		return nil
 	}
-	return 0, fmt.Errorf("%w: city not supported", ErrInvalidPickUpPoint)
+	return fmt.Errorf("%w: city not supported", ErrInvalidPickUpPoint)
 
 }

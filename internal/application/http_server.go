@@ -38,7 +38,7 @@ func SetupHTTPServer(userService users.UserService, receptionsService receptions
 	}))
 	server := &httpServer{
 		UserHandlers:      users.RegisterUserHandlers(userService),
-		ReceptionHandlers: &receptions.ReceptionHandlers{},
+		ReceptionHandlers: receptions.RegisterReceptionHandlers(receptionsService),
 	}
 	openapi.RegisterHandlersWithOptions(r, server, openapi.GinServerOptions{
 		BaseURL:      "/api/v1",

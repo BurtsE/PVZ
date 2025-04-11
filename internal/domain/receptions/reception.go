@@ -22,11 +22,11 @@ func NewReception(id, pvzId uuid.UUID, status string, initTime time.Time) (*Rece
 	}, nil
 }
 
-func CreateReception(pvzId uuid.UUID) (*Reception, error) {
+func CreateReception(pvzId uuid.UUID, status string, initTime time.Time) (*Reception, error) {
 	return NewReception(
 		uuid.New(),
 		pvzId,
-		"in_progress",
-		time.Now(),
+		status,
+		initTime,
 	)
 }
