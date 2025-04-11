@@ -8,7 +8,7 @@ import (
 
 const (
 	IN_PROGRESS = "in_progress"
-	CLOSED      = "closed"
+	CLOSED      = "close"
 )
 
 type Reception struct {
@@ -47,7 +47,7 @@ func (r Reception) Status() string {
 	return r.status
 }
 
-func (r Reception) PvzId() uuid.UUID {
+func (r Reception) PvzID() uuid.UUID {
 	return r.pvzId
 }
 

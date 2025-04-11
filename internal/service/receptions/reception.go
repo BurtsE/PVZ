@@ -19,7 +19,6 @@ func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID)
 	return *reception, err
 }
 
-func (s *ReceptionService) CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.PickUpPoint, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *ReceptionService) CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error) {
+	return s.receptionRepo.CloseReception(ctx, pvzID)
 }

@@ -15,7 +15,7 @@ type ReceptionService interface {
 	CreatePoint(ctx context.Context, point domain.PickUpPoint) error
 	GetPointList(ctx context.Context, startDate, endDate time.Time, page, limit int) ([]*domain.PickUpPoint, error)
 	CreateReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
-	CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.PickUpPoint, error)
+	CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
 	AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, error)
 	DeleteLastProductFromReception(ctx context.Context, receptionID uuid.UUID) error
 }
@@ -63,8 +63,12 @@ func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
-	//TODO implement me
-	panic("implement me")
+	reception, err := r.s.CloseLastReception(c, pvzId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, convertDomainToResponse(reception))
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
@@ -83,5 +87,14 @@ func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, reception)
+	c.JSON(http.StatusOK, convertDomainToResponse(reception))
+}
+
+func convertDomainToResponse(reception domain.Reception) gin.H {
+	return gin.H{
+		"id":       reception.ID(),
+		"dateTime": reception.InitTime(),
+		"pvzId":    reception.PvzID(),
+		"status":   reception.Status(),
+	}
 }

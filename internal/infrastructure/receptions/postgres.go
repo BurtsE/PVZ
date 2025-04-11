@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	domain "pvz/internal/domain/receptions"
 	reseptionService "pvz/internal/service/receptions"
+	"time"
 )
 
 var _ reseptionService.ReceptionRepository = (*PostgresRepo)(nil)
@@ -37,7 +38,7 @@ func (r *PostgresRepo) CreatePoint(ctx context.Context, point domain.PickUpPoint
 }
 
 func (r *PostgresRepo) CreateReception(ctx context.Context, reception domain.Reception) error {
-	status, err := r.lastReceptionStatus(ctx, reception.PvzId())
+	status, err := r.lastReceptionStatus(ctx, reception.PvzID())
 	if err != nil {
 		return err
 	}
@@ -49,10 +50,38 @@ func (r *PostgresRepo) CreateReception(ctx context.Context, reception domain.Rec
 		VALUES ($1, $2, $3, $4)
 	`
 	if _, err = r.conn.Exec(ctx, query, reception.ID(),
-		reception.InitTime(), reception.Status(), reception.PvzId()); err != nil {
+		reception.InitTime(), reception.Status(), reception.PvzID()); err != nil {
 		return fmt.Errorf("failed to exec insert reception query: %w", err)
 	}
 	return nil
+}
+
+func (r *PostgresRepo) CloseReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error) {
+	status, err := r.lastReceptionStatus(ctx, pvzID)
+	if err != nil {
+		return domain.Reception{}, err
+	}
+	if status == domain.CLOSED {
+		return domain.Reception{}, fmt.Errorf("no open receptions exists")
+	}
+	query := `
+		UPDATE receptions SET status = $1 WHERE (point_id = $2 AND status = 'in_progress')
+		RETURNING id, registration_date
+	`
+	var (
+		id               uuid.UUID
+		registrationDate time.Time
+	)
+	err = r.conn.QueryRow(ctx, query, domain.CLOSED, pvzID).Scan(&id, &registrationDate)
+	if err != nil {
+		return domain.Reception{}, fmt.Errorf("failed to close reception query: %w", err)
+	}
+	reception, err := domain.NewReception(id, pvzID, status, registrationDate, nil)
+	if err != nil {
+		return domain.Reception{}, err
+	}
+	return *reception, nil
+
 }
 
 func (r *PostgresRepo) lastReceptionStatus(ctx context.Context, pvzID uuid.UUID) (string, error) {
