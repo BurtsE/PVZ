@@ -36,12 +36,20 @@ func NewProduct(id uuid.UUID, time time.Time, productType string) (*Product, err
 	}, nil
 }
 
-func CreateProduct(name string, productType string) (*Product, error) {
+func CreateProduct(productType string) (*Product, error) {
 	return NewProduct(uuid.New(), time.Now(), productType)
 }
 
 func (p *Product) ID() uuid.UUID {
 	return p.id
+}
+
+func (p *Product) ArrivalTime() time.Time {
+	return p.arrivalTime
+}
+
+func (p *Product) ProductType() string {
+	return p.productType
 }
 
 func validateProductType(productType string) error {

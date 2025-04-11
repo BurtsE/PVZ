@@ -10,7 +10,7 @@ CREATE TYPE cities_available AS ENUM (
     'Москва',
     'Санкт-Петербург',
     'Казань'
-);
+    );
 
 CREATE TABLE points
 (
@@ -22,7 +22,7 @@ CREATE TABLE points
 CREATE TYPE status AS ENUM (
     'in_progress',
     'close'
-);
+    );
 
 CREATE TABLE receptions
 (
@@ -36,12 +36,12 @@ CREATE TYPE product_type AS ENUM (
     'электроника',
     'одежда',
     'обувь'
-);
+    );
 
 CREATE TABLE products
 (
     id           UUID PRIMARY KEY,
     arrival_date TIMESTAMP    NOT NULL,
     type         product_type NOT NULL,
-    point_id     UUID         NOT NULL REFERENCES points ("id")
+    reception_id UUID         NOT NULL REFERENCES receptions ("id")
 );

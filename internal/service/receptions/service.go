@@ -13,6 +13,7 @@ type ReceptionRepository interface {
 	CreatePoint(ctx context.Context, point domain.PickUpPoint) error
 	CreateReception(ctx context.Context, reception domain.Reception) error
 	CloseReception(ctx context.Context, pvzId uuid.UUID) (domain.Reception, error)
+	AddProduct(ctx context.Context, product domain.Product, pvzID uuid.UUID) (uuid.UUID, error)
 }
 
 type ReceptionService struct {

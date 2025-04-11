@@ -6,9 +6,16 @@ import (
 	domain "pvz/internal/domain/receptions"
 )
 
-func (s *ReceptionService) AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *ReceptionService) AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, uuid.UUID, error) {
+	product, err := domain.CreateProduct(productType)
+	if err != nil {
+		return domain.Product{}, uuid.Nil, err
+	}
+	receptionID, err := s.receptionRepo.AddProduct(ctx, *product, pvzID)
+	if err != nil {
+		return domain.Product{}, uuid.Nil, err
+	}
+	return *product, receptionID, nil
 }
 
 func (s *ReceptionService) DeleteLastProductFromReception(ctx context.Context, receptionID uuid.UUID) error {

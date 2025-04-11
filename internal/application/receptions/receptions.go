@@ -16,7 +16,7 @@ type ReceptionService interface {
 	GetPointList(ctx context.Context, startDate, endDate time.Time, page, limit int) ([]*domain.PickUpPoint, error)
 	CreateReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
 	CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
-	AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, error)
+	AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, uuid.UUID, error)
 	DeleteLastProductFromReception(ctx context.Context, receptionID uuid.UUID) error
 }
 
@@ -29,8 +29,22 @@ func RegisterReceptionHandlers(s ReceptionService) *ReceptionHandlers {
 }
 
 func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	body := openapi.PostProductsJSONBody{}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ID, err := uuid.Parse(body.PvzId.String())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	product, receptionID, err := r.s.AddProduct(c, ID, string(body.Type))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, convertProductToResponse(product, receptionID.String()))
 }
 
 func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
@@ -68,7 +82,7 @@ func (r *ReceptionHandlers) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, convertDomainToResponse(reception))
+	c.JSON(http.StatusOK, convertReceptionToResponse(reception))
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
@@ -87,14 +101,23 @@ func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, convertDomainToResponse(reception))
+	c.JSON(http.StatusOK, convertReceptionToResponse(reception))
 }
 
-func convertDomainToResponse(reception domain.Reception) gin.H {
+func convertReceptionToResponse(reception domain.Reception) gin.H {
 	return gin.H{
 		"id":       reception.ID(),
 		"dateTime": reception.InitTime(),
 		"pvzId":    reception.PvzID(),
 		"status":   reception.Status(),
+	}
+}
+
+func convertProductToResponse(product domain.Product, receptionID string) gin.H {
+	return gin.H{
+		"id":          product.ID(),
+		"dateTime":    product.ArrivalTime(),
+		"type":        product.ProductType(),
+		"receptionId": receptionID,
 	}
 }
