@@ -10,6 +10,7 @@ var _ app.ReceptionService = (*ReceptionService)(nil)
 
 type ReceptionRepository interface {
 	CreatePoint(ctx context.Context, point domain.PickUpPoint) error
+	CreateReception(ctx context.Context, reception domain.Reception) error
 }
 
 type ReceptionService struct {

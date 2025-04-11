@@ -84,6 +84,4 @@ func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, reception)
-	//TODO implement me
-	panic("implement me")
 }

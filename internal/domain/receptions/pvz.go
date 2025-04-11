@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	Moscow = "Москва"
-	Spb    = "Санкт-Петербург"
-	Kazan  = "Казань"
+	MOSCOW = "Москва"
+	SPB    = "Санкт-Петербург"
+	KAZAN  = "Казань"
 )
 
 var (
@@ -71,11 +71,11 @@ func validatePointRegistry(registrationDate time.Time) error {
 }
 func validatePointCity(city string) error {
 	switch city {
-	case Moscow:
+	case MOSCOW:
 		return nil
-	case Spb:
+	case SPB:
 		return nil
-	case Kazan:
+	case KAZAN:
 		return nil
 	}
 	return fmt.Errorf("%w: city not supported", ErrInvalidPickUpPoint)
