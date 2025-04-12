@@ -11,6 +11,6 @@ func (s *ReceptionService) CreatePoint(ctx context.Context, point domain.PickUpP
 }
 
 func (s *ReceptionService) GetPointList(ctx context.Context, startDate, endDate time.Time, page, limit int) ([]*domain.PickUpPoint, error) {
-	//TODO implement me
-	panic("implement me")
+	offset := (page - 1) * limit
+	return s.receptionRepo.GetPointList(ctx, startDate, endDate, limit, offset)
 }

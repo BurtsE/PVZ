@@ -8,11 +8,11 @@ import (
 )
 
 func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error) {
-	reception, err := domain.CreateReception(pvzID, "in_progress", time.Now(), nil)
+	reception, err := domain.CreateReception("in_progress", time.Now(), nil)
 	if err != nil {
 		return domain.Reception{}, err
 	}
-	err = s.receptionRepo.CreateReception(ctx, *reception)
+	err = s.receptionRepo.CreateReception(ctx, *reception, pvzID)
 	if err != nil {
 		return domain.Reception{}, err
 	}

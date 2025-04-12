@@ -17,7 +17,7 @@ type ReceptionService interface {
 	CreateReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
 	CloseLastReception(ctx context.Context, pvzID uuid.UUID) (domain.Reception, error)
 	AddProduct(ctx context.Context, pvzID uuid.UUID, productType string) (domain.Product, uuid.UUID, error)
-	DeleteLastProductFromReception(ctx context.Context, receptionID uuid.UUID) error
+	DeleteLastProductFromReception(ctx context.Context, pvzID uuid.UUID) error
 }
 
 type ReceptionHandlers struct {
@@ -48,8 +48,28 @@ func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
 }
 
 func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
-	//TODO implement me
-	panic("implement me")
+	if params.Page == nil || params.Limit == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
+		return
+	}
+	if params.EndDate == nil {
+		tmp := time.Now()
+		params.EndDate = &tmp
+	}
+	if params.StartDate == nil {
+		tmp := time.Now().AddDate(-1, -1, 0)
+		params.StartDate = &tmp
+	}
+	if params.EndDate.Before(*params.StartDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid time window"})
+		return
+	}
+	points, err := r.s.GetPointList(c, *params.StartDate, *params.EndDate, *params.Page, *params.Limit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, convertPointListToResponse(points))
 }
 
 func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
@@ -63,7 +83,7 @@ func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	point, err := domain.NewPickUpPoint(ID, *body.RegistrationDate, string(body.City))
+	point, err := domain.NewPickUpPoint(ID, *body.RegistrationDate, string(body.City), nil)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -82,12 +102,15 @@ func (r *ReceptionHandlers) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, convertReceptionToResponse(reception))
+	c.JSON(http.StatusOK, convertReceptionToResponse(reception, pvzId.String()))
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
-	//TODO implement me
-	panic("implement me")
+	err := r.s.DeleteLastProductFromReception(c, pvzId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 }
 
 func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
@@ -101,16 +124,24 @@ func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, convertReceptionToResponse(reception))
+	c.JSON(http.StatusOK, convertReceptionToResponse(reception, body.PvzId.String()))
 }
 
-func convertReceptionToResponse(reception domain.Reception) gin.H {
-	return gin.H{
+func convertReceptionToResponse(reception domain.Reception, pvzId string) gin.H {
+	result := gin.H{
 		"id":       reception.ID(),
 		"dateTime": reception.InitTime(),
-		"pvzId":    reception.PvzID(),
+		"pvzId":    pvzId,
 		"status":   reception.Status(),
 	}
+	if len(reception.Products()) > 0 {
+		products := make([]gin.H, 0, len(reception.Products()))
+		for _, product := range reception.Products() {
+			products = append(products, convertProductToResponse(product, reception.ID().String()))
+		}
+		result["products"] = products
+	}
+	return result
 }
 
 func convertProductToResponse(product domain.Product, receptionID string) gin.H {
@@ -120,4 +151,24 @@ func convertProductToResponse(product domain.Product, receptionID string) gin.H 
 		"type":        product.ProductType(),
 		"receptionId": receptionID,
 	}
+}
+
+func convertPointListToResponse(points []*domain.PickUpPoint) []gin.H {
+	var result []gin.H
+	for _, pickUpPoint := range points {
+		point := gin.H{
+			"id":               pickUpPoint.ID(),
+			"registrationDate": pickUpPoint.RegistrationDate(),
+			"city":             pickUpPoint.City(),
+		}
+		receptions := make([]gin.H, 0, len(pickUpPoint.Receptions()))
+		for _, r := range pickUpPoint.Receptions() {
+			receptions = append(receptions, convertReceptionToResponse(r, pickUpPoint.ID().String()))
+		}
+		result = append(result, gin.H{
+			"pvz":        point,
+			"receptions": receptions,
+		})
+	}
+	return result
 }

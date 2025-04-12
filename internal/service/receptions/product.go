@@ -18,7 +18,6 @@ func (s *ReceptionService) AddProduct(ctx context.Context, pvzID uuid.UUID, prod
 	return *product, receptionID, nil
 }
 
-func (s *ReceptionService) DeleteLastProductFromReception(ctx context.Context, receptionID uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+func (s *ReceptionService) DeleteLastProductFromReception(ctx context.Context, pvzID uuid.UUID) error {
+	return s.receptionRepo.DeleteLastAddedProduct(ctx, pvzID)
 }

@@ -12,27 +12,28 @@ const (
 )
 
 type Reception struct {
-	id       uuid.UUID
-	status   string
-	pvzId    uuid.UUID
-	initTime time.Time
-	products []Product
+	id     uuid.UUID
+	status string
+	//pvzId    uuid.UUID
+	registrationDate time.Time
+	products         []Product
 }
 
-func NewReception(id, pvzId uuid.UUID, status string, initTime time.Time, products []Product) (*Reception, error) {
+func NewReception(id uuid.UUID, status string, initTime time.Time, products []Product) (*Reception, error) {
+	if err := validateReceptionStatus(status); err != nil {
+		return nil, err
+	}
 	return &Reception{
-		id:       id,
-		status:   status,
-		pvzId:    pvzId,
-		initTime: initTime,
-		products: products,
+		id:               id,
+		status:           status,
+		registrationDate: initTime,
+		products:         products,
 	}, nil
 }
 
-func CreateReception(pvzId uuid.UUID, status string, initTime time.Time, products []Product) (*Reception, error) {
+func CreateReception(status string, initTime time.Time, products []Product) (*Reception, error) {
 	return NewReception(
 		uuid.New(),
-		pvzId,
 		status,
 		initTime,
 		products,
@@ -47,12 +48,8 @@ func (r Reception) Status() string {
 	return r.status
 }
 
-func (r Reception) PvzID() uuid.UUID {
-	return r.pvzId
-}
-
 func (r Reception) InitTime() time.Time {
-	return r.initTime
+	return r.registrationDate
 }
 
 func (r Reception) Products() []Product {

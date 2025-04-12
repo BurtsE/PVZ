@@ -25,7 +25,7 @@ type PickUpPoint struct {
 	receptions       []Reception
 }
 
-func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, city string) (*PickUpPoint, error) {
+func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, city string, receptions []Reception) (*PickUpPoint, error) {
 
 	if err := validatePointCity(city); err != nil {
 		return nil, err
@@ -38,11 +38,12 @@ func NewPickUpPoint(id uuid.UUID, registrationDate time.Time, city string) (*Pic
 		id:               id,
 		registrationDate: registrationDate,
 		city:             city,
+		receptions:       receptions,
 	}, nil
 }
 
-func CreatePickUpPoint(registrationDate time.Time, city string) (*PickUpPoint, error) {
-	return NewPickUpPoint(uuid.New(), registrationDate, city)
+func CreatePickUpPoint(registrationDate time.Time, city string, receptions []Reception) (*PickUpPoint, error) {
+	return NewPickUpPoint(uuid.New(), registrationDate, city, receptions)
 }
 
 func (p PickUpPoint) ID() uuid.UUID {
