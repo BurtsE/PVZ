@@ -63,7 +63,7 @@ func (t *Token) Create(user domain.User) (string, error) {
 		"ID":            user.ID(),
 		"Email":         user.Email(),
 		"Role":          user.Role(),
-		"Password_hash": user.PasswordHash(),
+		"Password_hash": string(user.PasswordHash()),
 	})
 	return token.SignedString(t.secretKey)
 }
