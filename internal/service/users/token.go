@@ -29,16 +29,20 @@ func (t *Token) Parse(tokenString string) (domain.User, error) {
 
 	var (
 		claims       jwt.MapClaims
-		id           uuid.UUID
+		id           string
 		email        string
-		passwordHash []byte
+		passwordHash string
 		role         string
 		ok           bool
 	)
 	if claims, ok = token.Claims.(jwt.MapClaims); !ok {
 		return domain.User{}, ErrInvalidToken
 	}
-	if id, ok = claims["ID"].(uuid.UUID); !ok {
+	if id, ok = claims["ID"].(string); !ok {
+		return domain.User{}, ErrInvalidToken
+	}
+	ID, err := uuid.Parse(id)
+	if err != nil {
 		return domain.User{}, ErrInvalidToken
 	}
 	if email, ok = claims["Email"].(string); !ok {
@@ -47,11 +51,11 @@ func (t *Token) Parse(tokenString string) (domain.User, error) {
 	if role, ok = claims["Role"].(string); !ok {
 		return domain.User{}, ErrInvalidToken
 	}
-	if passwordHash, ok = claims["Password_hash"].([]byte); !ok {
+	if passwordHash, ok = claims["Password_hash"].(string); !ok {
 		return domain.User{}, ErrInvalidToken
 	}
 
-	return domain.NewUser(id, email, role, passwordHash)
+	return domain.NewUser(ID, email, role, []byte(passwordHash))
 }
 
 func (t *Token) Create(user domain.User) (string, error) {

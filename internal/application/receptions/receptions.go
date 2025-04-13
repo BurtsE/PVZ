@@ -2,12 +2,14 @@ package receptions
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"net/http"
 	"pvz/generated/openapi"
 	domain "pvz/internal/domain/receptions"
+	"pvz/internal/domain/users"
 	"time"
 )
 
@@ -21,7 +23,7 @@ type ReceptionService interface {
 }
 
 type ReceptionHandlers struct {
-	s ReceptionService
+	Service ReceptionService
 }
 
 func RegisterReceptionHandlers(s ReceptionService) *ReceptionHandlers {
@@ -29,6 +31,12 @@ func RegisterReceptionHandlers(s ReceptionService) *ReceptionHandlers {
 }
 
 func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
+	role, err := getRole(c)
+	if err != nil || role != users.Employee {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only employees can add products"})
+		return
+	}
+
 	body := openapi.PostProductsJSONBody{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -39,7 +47,7 @@ func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	product, receptionID, err := r.s.AddProduct(c, ID, string(body.Type))
+	product, receptionID, err := r.Service.AddProduct(c, ID, string(body.Type))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -48,6 +56,11 @@ func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
 }
 
 func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) {
+	role, err := getRole(c)
+	if err != nil || (role != users.Employee && role != users.Moderator) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only employees can add products"})
+		return
+	}
 	if params.Page == nil || params.Limit == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
 		return
@@ -64,7 +77,7 @@ func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) 
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid time window"})
 		return
 	}
-	points, err := r.s.GetPointList(c, *params.StartDate, *params.EndDate, *params.Page, *params.Limit)
+	points, err := r.Service.GetPointList(c, *params.StartDate, *params.EndDate, *params.Page, *params.Limit)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -73,6 +86,11 @@ func (r *ReceptionHandlers) GetPvz(c *gin.Context, params openapi.GetPvzParams) 
 }
 
 func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
+	role, err := getRole(c)
+	if err != nil || role != users.Moderator {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only moderator can add points"})
+		return
+	}
 	body := openapi.PostPvzJSONRequestBody{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -88,7 +106,7 @@ func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err = r.s.CreatePoint(c, *point)
+	err = r.Service.CreatePoint(c, *point)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -97,7 +115,12 @@ func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId openapi_types.UUID) {
-	reception, err := r.s.CloseLastReception(c, pvzId)
+	role, err := getRole(c)
+	if err != nil || role != users.Employee {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only employees can close receptions"})
+		return
+	}
+	reception, err := r.Service.CloseLastReception(c, pvzId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -106,7 +129,12 @@ func (r *ReceptionHandlers) PostPvzPvzIdCloseLastReception(c *gin.Context, pvzId
 }
 
 func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId openapi_types.UUID) {
-	err := r.s.DeleteLastProductFromReception(c, pvzId)
+	role, err := getRole(c)
+	if err != nil || role != users.Employee {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only employees can delete products"})
+		return
+	}
+	err = r.Service.DeleteLastProductFromReception(c, pvzId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -114,12 +142,17 @@ func (r *ReceptionHandlers) PostPvzPvzIdDeleteLastProduct(c *gin.Context, pvzId 
 }
 
 func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
+	role, err := getRole(c)
+	if err != nil || role != users.Employee {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only employees can open receptions"})
+		return
+	}
 	body := openapi.PostReceptionsJSONBody{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	reception, err := r.s.CreateReception(c, body.PvzId)
+	reception, err := r.Service.CreateReception(c, body.PvzId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -171,4 +204,16 @@ func convertPointListToResponse(points []*domain.PickUpPoint) []gin.H {
 		})
 	}
 	return result
+}
+
+func getRole(c *gin.Context) (string, error) {
+	var user users.User
+	userV, ok := c.Get("user")
+	if !ok {
+		return "", errors.New("user not found")
+	}
+	if user, ok = userV.(users.User); !ok {
+		return "", errors.New("user not found")
+	}
+	return user.Role(), nil
 }

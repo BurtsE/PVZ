@@ -15,7 +15,7 @@ type UserService interface {
 }
 
 type UserHandlers struct {
-	s UserService
+	Service UserService
 }
 
 func RegisterUserHandlers(s UserService) *UserHandlers {
@@ -30,7 +30,7 @@ func (u *UserHandlers) PostDummyLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := u.s.RegisterUser(c, "dummy@example.com", "dummy_password", string(body.Role))
+	token, err := u.Service.RegisterUser(c, "dummy@example.com", "dummy_password", string(body.Role))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -46,7 +46,7 @@ func (u *UserHandlers) PostLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := u.s.LoginUser(c, string(body.Email), body.Password)
+	token, err := u.Service.LoginUser(c, string(body.Email), body.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -59,7 +59,7 @@ func (u *UserHandlers) PostRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, err := u.s.RegisterUser(c, string(body.Email), body.Password, string(body.Role))
+	token, err := u.Service.RegisterUser(c, string(body.Email), body.Password, string(body.Role))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
