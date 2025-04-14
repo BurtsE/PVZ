@@ -69,18 +69,6 @@ func (u *User) Role() string {
 	}
 }
 
-func (u *User) SendToEmail(_ string) error {
-	return errors.New("not implemented")
-}
-
-func (u *User) ChangeEmail(email string) error {
-	if err := validateEmail(email); err != nil {
-		return err
-	}
-	u.email = email
-	return nil
-}
-
 func validateEmail(email string) error {
 	if email == "" {
 		return fmt.Errorf("%w: email is required", ErrUserValidation)

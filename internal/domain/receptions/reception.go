@@ -12,9 +12,8 @@ const (
 )
 
 type Reception struct {
-	id     uuid.UUID
-	status string
-	//pvzId    uuid.UUID
+	id               uuid.UUID
+	status           string
 	registrationDate time.Time
 	products         []Product
 }

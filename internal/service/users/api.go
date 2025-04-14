@@ -51,5 +51,4 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (st
 		return "", err
 	}
 	return token, nil
-
 }

@@ -41,8 +41,6 @@ func SetupHTTPServer(userService users.UserService, receptionsService receptions
 		ReceptionHandlers: receptions.RegisterReceptionHandlers(receptionsService),
 	}
 	r.Use(server.LoginMiddleware())
-	//registry := middleware.NewMiddlewareRegistry()
-	//registry.Register("PostPvz", server.AdminRequiLoredMiddleware())
 	openapi.RegisterHandlersWithOptions(r, server, openapi.GinServerOptions{
 		BaseURL:      "/api/v1",
 		Middlewares:  nil,

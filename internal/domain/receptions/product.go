@@ -15,7 +15,7 @@ const (
 
 var (
 	ErrProductNotFound = errors.New("product not found")
-	ErrInvalidProduct  = errors.New("invalid products")
+	ErrInvalidProduct  = errors.New("invalid product")
 )
 
 type Product struct {

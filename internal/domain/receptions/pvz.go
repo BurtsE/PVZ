@@ -80,5 +80,4 @@ func validatePointCity(city string) error {
 		return nil
 	}
 	return fmt.Errorf("%w: city not supported", ErrInvalidPickUpPoint)
-
 }

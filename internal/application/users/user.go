@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"pvz/generated/openapi"
 	"pvz/internal/domain/users"
+	"pvz/pkg/random"
 )
 
 type UserService interface {
@@ -30,7 +31,7 @@ func (u *UserHandlers) PostDummyLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := u.Service.RegisterUser(c, "dummy@example.com", "dummy_password", string(body.Role))
+	token, err := u.Service.RegisterUser(c, random.GenerateRandomEmail(), random.GenerateRandomPassword(10), string(body.Role))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -59,6 +60,7 @@ func (u *UserHandlers) PostRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	token, err := u.Service.RegisterUser(c, string(body.Email), body.Password, string(body.Role))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
