@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/8d27b061-a343-425d-8645-0293fc2e4a27)# Сервис для работы с ПВЗ
+# Сервис для работы с ПВЗ
 
 ## Стек
 Язык сервиса: Go.
