@@ -1,4 +1,4 @@
-# Сервис для работы с ПВЗ
+![image](https://github.com/user-attachments/assets/8d27b061-a343-425d-8645-0293fc2e4a27)# Сервис для работы с ПВЗ
 
 ## Стек
 Язык сервиса: Go.
@@ -16,7 +16,7 @@ docker-compose -f deploy/compose.yml up
 * POSTGRES_PASSWORD=123
 * POSTGRES_DB=pvz
 * DATABASE_HOST=localhost
-## Доступ по порту 8080, у всех апи ручек добавлен преикс /api/v1, пример запроса:
+## Доступ по порту 8080, у всех апи ручек добавлен префикс /api/v1, пример запроса:
   localhost:8080/api/v1/dummyLogin
 
 ## Для доступа к апи с необходимостью авторизации необходим http заголовок Authorization:
