@@ -59,7 +59,7 @@ func TestMain(m *testing.M) {
 	}))
 	defer ts.Close()
 
-	serverURL = "http://localhost/api/v1"
+	serverURL = "http://localhost:8080/api/v1"
 
 	// Получаем токены для тестов
 	if err := getTestTokens(); err != nil {
