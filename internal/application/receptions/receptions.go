@@ -97,6 +97,10 @@ func (r *ReceptionHandlers) PostPvz(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if body.RegistrationDate == nil || body.Id == nil || body.City == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
+		return
+	}
 	ID, err := uuid.Parse(body.Id.String())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
