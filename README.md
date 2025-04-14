@@ -23,3 +23,5 @@ docker-compose -f deploy/compose.yml up
   Bearer {Токен}
   ![image](https://github.com/user-attachments/assets/552e0c5d-ab7f-47a6-874b-e67ab2441b67)
 
+## Запуск интеграционного теста:
+go test ./integrational_tests
