@@ -42,6 +42,7 @@ func (r *ReceptionHandlers) PostProducts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	ID, err := uuid.Parse(body.PvzId.String())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -152,6 +153,11 @@ func (r *ReceptionHandlers) PostReceptions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if body.PvzId.String() == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid point id"})
+		return
+	}
+
 	reception, err := r.Service.CreateReception(c, body.PvzId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
